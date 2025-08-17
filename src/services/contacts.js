@@ -39,7 +39,11 @@ export const getAllContacts = async ({
 
   const [contactsCount, contacts] = await Promise.all([
     contactscollection.countDocuments(contactsQuery.getFilter()),
-    contactsQuery.skip(skip).limit(limit).sort(`${sortBy} ${sortOrder}`).exec(),
+    contactsQuery
+      .skip(skip)
+      .limit(limit)
+      .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
+      .exec(),
   ]);
 
   const paginateData = calculatePaginationData(contactsCount, page, perPage);
