@@ -10,33 +10,23 @@ import {
 
 const contactsRouter = Router();
 
-contactsRouter.get('/', s.homePageController);
+contactsRouter.get('/', s.getContactsAllController);
 
-contactsRouter.get('/contacts', s.getContactsAllController);
-
-contactsRouter.get(
-  '/contacts/:contactId',
-  isValidId,
-  s.getContactByIdController,
-);
+contactsRouter.get('/:contactId', isValidId, s.getContactByIdController);
 
 contactsRouter.post(
-  '/contacts',
+  '/',
   validateBody(contactsValidationSchemaCreate),
   s.createContactController,
 );
 
 contactsRouter.patch(
-  '/contacts/:contactId',
+  '/:contactId',
   isValidId,
   validateBody(contactsValidationSchemaUpdate),
   s.patchContactController,
 );
 
-contactsRouter.delete(
-  '/contacts/:contactId',
-  isValidId,
-  s.deleteContactController,
-);
+contactsRouter.delete('/:contactId', isValidId, s.deleteContactController);
 
 export default contactsRouter;
