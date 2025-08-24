@@ -28,6 +28,7 @@ export const getContactsAllController = async (req, res) => {
     name,
     email,
     phoneNumber,
+    userId: req.user._id,
   });
 
   res.status(200).json({
@@ -39,7 +40,8 @@ export const getContactsAllController = async (req, res) => {
 
 export const getContactByIdController = async (req, res) => {
   const { contactId } = req.params;
-  const contact = await s.getContactById(contactId);
+
+  const contact = await s.getContactById(contactId, req.user._id);
 
   if (!contact) {
     throw createHttpError(404, 'Contact not found');
@@ -53,7 +55,13 @@ export const getContactByIdController = async (req, res) => {
 };
 
 export const createContactController = async (req, res) => {
-  const contact = await s.createContact(req.body);
+  if (!req.user || !req.user._id) {
+    throw createHttpError(401, 'Unauthorized');
+  }
+
+  const payload = { ...req.body, userId: req.user._id };
+
+  const contact = await s.createContact(payload);
 
   res.status(201).json({
     status: 201,
@@ -64,22 +72,28 @@ export const createContactController = async (req, res) => {
 
 export const patchContactController = async (req, res, next) => {
   const { contactId } = req.params;
-  const isResult = await s.updateContact(contactId, req.body);
 
-  if (!isResult) {
+  const updatedContact = await s.updateContact(
+    contactId,
+    req.body,
+    req.user._id,
+  );
+
+  if (!updatedContact) {
     throw createHttpError(404, 'Contact not found');
   }
 
   res.status(200).json({
     status: 200,
     message: `Successfully patched a ${Object.keys(req.body).join(', ')}!`,
-    data: isResult.contact,
+    data: updatedContact,
   });
 };
 
 export const deleteContactController = async (req, res, next) => {
   const { contactId } = req.params;
-  const deleteCcontact = await s.deleteContact(contactId);
+
+  const deleteCcontact = await s.deleteContact(contactId, req.user._id);
 
   if (!deleteCcontact) {
     next(createHttpError(404, 'Contact not found'));

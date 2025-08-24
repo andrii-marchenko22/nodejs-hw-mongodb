@@ -1,16 +1,16 @@
 import createHttpError from 'http-errors';
-import { Session } from '../db/models/session';
-import { User } from '../db/models/user';
+import { Session } from '../db/models/session.js';
+import { User } from '../db/models/user.js';
 
 const authenticate = async (req, res, next) => {
-  const authHader = req.get('Authorization');
+  const authHeader = req.get('Authorization');
 
-  if (!authHader) {
+  if (!authHeader) {
     next(createHttpError(401, 'Please provide Authorization header'));
     return;
   }
 
-  const [bearer, token] = authHader.split(' ');
+  const [bearer, token] = authHeader.split(' ');
 
   if (bearer !== 'Bearer' || !token) {
     next(createHttpError(401, 'Auth header should be of type Bearer'));
