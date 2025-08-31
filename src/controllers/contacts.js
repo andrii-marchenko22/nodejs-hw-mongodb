@@ -1,5 +1,6 @@
 import createHttpError from 'http-errors';
 import * as s from '../services/contacts.js';
+import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
 
 export const homePageController = async (req, res) => {
   const message = s.getHomePageMessage();
@@ -59,7 +60,14 @@ export const createContactController = async (req, res) => {
     throw createHttpError(401, 'Unauthorized');
   }
 
+  const photo = req.file;
+  let photoUrl;
   const payload = { ...req.body, userId: req.user._id };
+
+  if (photo) {
+    photoUrl = await saveFileToUploadDir(photo);
+    payload.photo = photoUrl;
+  }
 
   const contact = await s.createContact(payload);
 
@@ -72,10 +80,18 @@ export const createContactController = async (req, res) => {
 
 export const patchContactController = async (req, res, next) => {
   const { contactId } = req.params;
+  const photo = req.file;
+  const payload = { ...req.body };
+  let photoUrl;
+
+  if (photo) {
+    photoUrl = await saveFileToUploadDir(photo);
+    payload.photo = photoUrl;
+  }
 
   const updatedContact = await s.updateContact(
     contactId,
-    req.body,
+    payload,
     req.user._id,
   );
 

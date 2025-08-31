@@ -1,4 +1,4 @@
-import { THIRTY_DAYS } from '../constans/index.js';
+import { THIRTY_DAYS } from '../constants/index.js';
 
 export const SessionCookies = (res, session) => {
   res.cookie('refreshToken', session.refreshToken, {
