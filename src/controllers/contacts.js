@@ -1,6 +1,6 @@
 import createHttpError from 'http-errors';
 import * as s from '../services/contacts.js';
-import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
+import { saveFile } from '../utils/saveFile.js';
 
 export const homePageController = async (req, res) => {
   const message = s.getHomePageMessage();
@@ -65,7 +65,7 @@ export const createContactController = async (req, res) => {
   const payload = { ...req.body, userId: req.user._id };
 
   if (photo) {
-    photoUrl = await saveFileToUploadDir(photo);
+    photoUrl = await saveFile(photo);
     payload.photo = photoUrl;
   }
 
@@ -85,7 +85,7 @@ export const patchContactController = async (req, res, next) => {
   let photoUrl;
 
   if (photo) {
-    photoUrl = await saveFileToUploadDir(photo);
+    photoUrl = await saveFile(photo);
     payload.photo = photoUrl;
   }
 
