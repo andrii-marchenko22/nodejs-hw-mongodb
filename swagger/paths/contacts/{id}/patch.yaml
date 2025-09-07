@@ -16,7 +16,7 @@ parameters:
 requestBody:
   required: true
   content:
-    application/json:
+    multipart/form-data:
       schema:
         type: object
         properties:
@@ -44,6 +44,14 @@ requestBody:
               - home
               - personal
             example: 'work'
+          isFavourite:
+            description: 'Whether the contact is marked as favourite (optional)'
+            type: boolean
+            example: false
+          photo:
+            description: "Contact's photo (optional)"
+            type: string
+            format: binary
 responses:
   '200':
     description: Successfully updated the contact
