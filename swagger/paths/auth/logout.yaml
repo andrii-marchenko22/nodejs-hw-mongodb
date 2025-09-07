@@ -1,0 +1,24 @@
+tags:
+  - Auth
+summary: Logout user
+operationId: logoutUser
+description: 'Logs out a user by deleting the session and clearing session cookies.'
+security:
+  - cookieAuth: []
+parameters:
+  - in: cookie
+    name: sessionId
+    required: true
+    description: 'ID of the current session'
+    schema:
+      type: string
+responses:
+  '204':
+    description: Successfully logged out. Session cookies cleared.
+    headers:
+      Set-Cookie:
+        description: 'Clears sessionId and refreshToken cookies'
+        schema:
+          type: string
+  '401':
+    description: Unauthorized. Session not found

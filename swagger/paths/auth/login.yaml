@@ -1,0 +1,62 @@
+tags:
+  - Auth
+summary: Login user
+operationId: loginUser
+description: 'Login an existing user by providing email and password. Creates a session cookie and returns an access token.'
+security: []
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - email
+          - password
+        properties:
+          email:
+            description: 'User email address'
+            type: string
+            format: email
+            example: 'test@example.com'
+          password:
+            description: 'User password (6-15 characters)'
+            type: string
+            minLength: 6
+            maxLength: 15
+            example: '123456'
+responses:
+  '200':
+    description: Successfully logged in. Sets a session cookie in the response.
+    headers:
+      Set-Cookie:
+        description: 'HTTP cookie containing session information'
+        schema:
+          type: string
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - status
+            - message
+            - data
+          properties:
+            status:
+              type: integer
+              example: 200
+            message:
+              type: string
+              example: 'Successfully logged in an user!'
+            data:
+              type: object
+              required:
+                - accessToken
+              properties:
+                accessToken:
+                  type: string
+                  example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+  '400':
+    description: Bad request. Validation failed (invalid email or password)
+  '401':
+    description: Unauthorized. Invalid credentials

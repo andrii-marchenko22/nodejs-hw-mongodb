@@ -44,7 +44,7 @@ export const contactsValidationSchemaCreate = Joi.object({
     }),
   userId: Joi.string().custom((value, helper) => {
     if (value && !isValidObjectId(value)) {
-      return helper.message('Parent id should be a valid mongo id');
+      return helper.message('User id should be a valid mongo id');
     }
     return value;
   }),
