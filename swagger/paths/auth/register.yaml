@@ -1,0 +1,73 @@
+tags:
+  - Auth
+summary: Register a new user
+operationId: registerUser
+description: 'Register a new user account by providing name, email, and password.'
+security: []
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - name
+          - email
+          - password
+        properties:
+          name:
+            description: 'User name (3-20 characters)'
+            type: string
+            minLength: 3
+            maxLength: 20
+            example: 'John Doe'
+          email:
+            description: 'User email address'
+            type: string
+            format: email
+            example: 'test@example.com'
+          password:
+            description: 'User password (6-15 characters)'
+            type: string
+            minLength: 6
+            maxLength: 15
+            example: '123456'
+responses:
+  '201':
+    description: User successfully registered
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - status
+            - message
+            - data
+          properties:
+            status:
+              type: integer
+              example: 201
+            message:
+              type: string
+              example: 'User registered successfully!'
+            data:
+              type: object
+              required:
+                - _id
+                - name
+                - email
+              properties:
+                _id:
+                  type: string
+                  example: '65ca67e7ae7f10c88b598384'
+                name:
+                  type: string
+                  example: 'John Doe'
+                email:
+                  type: string
+                  format: email
+                  example: 'test@example.com'
+  '400':
+    description: 'Bad request. Validation failed (invalid name, email, or password)'
+  '409':
+    description: 'Conflict. Email is already in use'
