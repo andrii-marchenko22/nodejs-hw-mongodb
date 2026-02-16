@@ -4,6 +4,15 @@ import { User } from '../db/models/user.js';
 import { Session } from '../db/models/session.js';
 import generateTokens from '../utils/tokens.js';
 
+import jwt from 'jsonwebtoken';
+import { getEnvVar } from '../utils/getEnvVar.js';
+import { sendEmail } from '../utils/sendEmail.js';
+import { SMTP, TEMPLATES_DIR } from '../constants/index.js';
+
+import path from 'node:path';
+import fs from 'node:fs/promises';
+import handlebars from 'handlebars';
+
 export const registerUser = async (payload) => {
   const checkingUser = await User.findOne({ email: payload.email });
   if (checkingUser) {
@@ -66,4 +75,73 @@ export const refreshUserSession = async ({ refreshToken, sessionId }) => {
 
 export const logoutUser = async (sessionId) => {
   await Session.deleteOne({ _id: sessionId });
+};
+
+export const sendResetToken = async (email) => {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+
+  const resetToken = jwt.sign(
+    {
+      sub: user._id,
+      email,
+    },
+    getEnvVar('JWT_SECRET'),
+    { expiresIn: '15m' },
+  );
+
+  const resetPasswordTemplatePath = path.join(
+    TEMPLATES_DIR,
+    'reset-password-email.html',
+  );
+
+  const templateSource = (
+    await fs.readFile(resetPasswordTemplatePath)
+  ).toString();
+
+  const template = handlebars.compile(templateSource);
+
+  const html = template({
+    USERNAME: user.name,
+    RESET_LINK: `${getEnvVar('APP_DOMAIN')}/reset-password?token=${resetToken}`,
+  });
+
+  try {
+    await sendEmail({
+      from: getEnvVar(SMTP.SMTP_USER),
+      to: email,
+      subject: 'Your password has been successfully reset',
+      html,
+    });
+  } catch (err) {
+    if (err instanceof Error)
+      throw createHttpError(
+        500,
+        'Failed to send the email, please try again later.',
+      );
+  }
+};
+
+export const resetPassword = async (token, password) => {
+  let entries;
+
+  try {
+    entries = jwt.verify(token, getEnvVar('JWT_SECRET'));
+  } catch (err) {
+    if (err instanceof Error)
+      throw createHttpError(401, 'Token is expired or invalid.');
+  }
+
+  const user = await User.findOne({ email: entries.email, _id: entries.sub });
+
+  if (!user) {
+    throw createHttpError(404, 'User not found!');
+  }
+
+  const encryptedPassword = await bcrypt.hash(password, 10);
+
+  await User.updateOne({ _id: user._id }, { password: encryptedPassword });
 };

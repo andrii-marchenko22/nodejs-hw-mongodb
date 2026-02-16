@@ -1,5 +1,5 @@
 import { randomBytes } from 'crypto';
-import { FIFTEEN_MINUTES, THIRTY_DAYS } from '../constans/index.js';
+import { FIFTEEN_MINUTES, THIRTY_DAYS } from '../constants/index.js';
 
 const generateTokens = () => {
   const accessToken = randomBytes(30).toString('base64');
